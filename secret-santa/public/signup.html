@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Secret Santa 2024 🎅</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎅 Secret Santa 2024</h1>
+      <p class="subtitle">Create Your Password</p>
+
+      <div id="signupForm">
+        <div class="info-box">
+          <h3>Event Details</h3>
+          <ul>
+            <li>💵 Spending Limit: $50 maximum</li>
+            <li>💿 Bonus: You can also gift a disc (doesn't count toward the $50)</li>
+            <li>🎯 Theme: "Know Your Buddy" - Show how well you know your match!</li>
+            <li>📅 Match Reveal: November 1st</li>
+            <li>🎁 Gift Exchange: December 20th</li>
+          </ul>
+        </div>
+
+        <h2>Create Your Password</h2>
+        <p>Your password will be used to encrypt your Secret Santa match. Choose a strong password you'll remember!</p>
+
+        <form onsubmit="handleSignup(event)">
+          <input type="password" id="password" placeholder="Password (min 8 characters)" required minlength="8">
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+          <button type="submit">Create Account</button>
+        </form>
+
+        <p id="error" class="error"></p>
+      </div>
+
+      <div id="success" style="display: none;">
+        <div class="success-box">
+          <h2>✅ Account Created!</h2>
+          <p>Your password has been set successfully.</p>
+          <p>You can now log in to view your match once everyone has registered.</p>
+          <a href="/" class="btn">Go to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (!token) {
+      document.getElementById('error').textContent = 'Invalid signup link. Please check your email.';
+      document.querySelector('form').style.display = 'none';
+    }
+
+    async function handleSignup(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        document.getElementById('error').textContent = 'Passwords do not match';
+        return;
+      }
+
+      if (password.length < 8) {
+        document.getElementById('error').textContent = 'Password must be at least 8 characters';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Signup failed');
+        }
+
+        // Show success message
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+      } catch (error) {
+        document.getElementById('error').textContent = error.message;
+      }
+    }
+  </script>
+</body>
+</html>

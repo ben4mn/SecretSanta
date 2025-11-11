@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  secret-santa:
+    build: .
+    container_name: secret-santa
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - BASE_URL=${BASE_URL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - DB_PATH=/app/data/secretsanta.db
+      - SEND_INITIAL_EMAILS=${SEND_INITIAL_EMAILS:-false}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - secret-santa-network
+
+networks:
+  secret-santa-network:
+    driver: bridge

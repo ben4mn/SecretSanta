@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Santa 2024 🎅</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎅 Secret Santa</h1>
+      <p class="subtitle">Spread Holiday Cheer</p>
+
+      <div style="text-align: center; margin-bottom: 32px;">
+        <button onclick="showAdminLogin()" class="btn-secondary" style="margin-right: 12px;">Admin Login</button>
+        <button onclick="showParticipantLogin()" class="btn">Participant Login</button>
+      </div>
+
+      <!-- Admin Login Form -->
+      <div id="adminLoginForm" style="display: none;">
+        <h2>Admin Login</h2>
+        <form onsubmit="handleAdminLogin(event)">
+          <input type="email" id="adminEmail" placeholder="Admin Email" required value="ben@zyroi.com">
+          <input type="password" id="adminPassword" placeholder="Admin Password" required>
+          <button type="submit">Login as Admin</button>
+        </form>
+        <p id="adminError" class="error"></p>
+        <p style="text-align: center; margin-top: 16px;">
+          <a href="#" onclick="showParticipantLogin(); return false;" style="color: var(--forest-green);">Participant? Click here</a>
+        </p>
+      </div>
+
+      <!-- Participant Login Form -->
+      <div id="participantLoginForm" style="display: none;">
+        <h2>Participant Login</h2>
+        <form onsubmit="handleParticipantLogin(event)">
+          <input type="email" id="participantEmail" placeholder="Email" required>
+          <input type="password" id="participantPassword" placeholder="Password" required>
+          <button type="submit">Login</button>
+        </form>
+        <p id="participantError" class="error"></p>
+        <p style="text-align: center; margin-top: 16px;">
+          <a href="#" onclick="showAdminLogin(); return false;" style="color: var(--forest-green);">Admin? Click here</a>
+        </p>
+      </div>
+
+      <!-- Participant Dashboard -->
+      <div id="dashboard" style="display: none;">
+        <div class="welcome">
+          <h2>Welcome, <span id="userName"></span>!</h2>
+          <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+
+        <div id="matchSection">
+          <div class="match-status">
+            <h3>Match Status</h3>
+            <p id="statusMessage"></p>
+          </div>
+
+          <div id="matchReveal" style="display: none;">
+            <h3>🎁 Your Secret Santa Match</h3>
+            <p>Enter your password to reveal your match:</p>
+            <form onsubmit="revealMatch(event)">
+              <input type="password" id="matchPassword" placeholder="Password" required>
+              <button type="submit">Reveal Match</button>
+            </form>
+          </div>
+
+          <div id="matchDisplay" style="display: none;">
+            <div class="match-card">
+              <h3>🎯 You're buying for:</h3>
+              <h2 class="recipient-name" id="recipientName"></h2>
+              <p class="recipient-email" id="recipientEmail"></p>
+            </div>
+
+            <div class="rules-section">
+              <h3>📋 Event Rules</h3>
+              <div id="rulesDisplay"></div>
+              <p class="reminder">🤫 Remember: Keep your match secret!</p>
+            </div>
+          </div>
+
+          <p id="matchError" class="error"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let accessToken = localStorage.getItem('accessToken');
+    let currentUser = null;
+
+    // Show appropriate form on load
+    if (accessToken) {
+      const payload = parseJwt(accessToken);
+      if (payload.isAdmin) {
+        window.location.href = '/admin.html';
+      } else {
+        loadParticipantDashboard();
+      }
+    } else {
+      showParticipantLogin();
+    }
+
+    function showAdminLogin() {
+      document.getElementById('adminLoginForm').style.display = 'block';
+      document.getElementById('participantLoginForm').style.display = 'none';
+      document.getElementById('adminError').textContent = '';
+    }
+
+    function showParticipantLogin() {
+      document.getElementById('adminLoginForm').style.display = 'none';
+      document.getElementById('participantLoginForm').style.display = 'block';
+      document.getElementById('participantError').textContent = '';
+    }
+
+    async function handleAdminLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('adminEmail').value;
+      const password = document.getElementById('adminPassword').value;
+
+      try {
+        const response = await fetch('/api/auth/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        accessToken = data.accessToken;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        window.location.href = '/admin.html';
+      } catch (error) {
+        document.getElementById('adminError').textContent = error.message;
+      }
+    }
+
+    async function handleParticipantLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('participantEmail').value;
+      const password = document.getElementById('participantPassword').value;
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        accessToken = data.accessToken;
+        currentUser = data.user;
+
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        loadParticipantDashboard();
+      } catch (error) {
+        document.getElementById('participantError').textContent = error.message;
+      }
+    }
+
+    async function loadParticipantDashboard() {
+      try {
+        const statusResponse = await apiCall('/api/match/status');
+
+        document.getElementById('participantLoginForm').style.display = 'none';
+        document.getElementById('adminLoginForm').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+        const payload = parseJwt(accessToken);
+        document.getElementById('userName').textContent = payload.email.split('@')[0];
+
+        if (!statusResponse.allRegistered) {
+          document.getElementById('statusMessage').textContent = '⏳ Waiting for all participants to register...';
+        } else if (statusResponse.matchesGenerated || statusResponse.allRegistered) {
+          document.getElementById('statusMessage').style.display = 'none';
+          document.getElementById('matchReveal').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        logout();
+      }
+    }
+
+    async function revealMatch(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('matchPassword').value;
+
+      try {
+        const response = await apiCall(`/api/match/my-match?password=${encodeURIComponent(password)}`);
+
+        document.getElementById('matchReveal').style.display = 'none';
+        document.getElementById('matchDisplay').style.display = 'block';
+        document.getElementById('recipientName').textContent = response.match.name;
+        document.getElementById('recipientEmail').textContent = response.match.email;
+
+        // Display rules
+        const rules = response.rules;
+        document.getElementById('rulesDisplay').innerHTML = `
+          <ul>
+            <li>💵 Spending Limit: $${rules.maxSpend} maximum</li>
+            ${rules.bonusItem ? `<li>💿 Bonus: ${rules.bonusItem}</li>` : ''}
+            ${rules.theme ? `<li>🎯 Theme: ${rules.theme}</li>` : ''}
+          </ul>
+        `;
+      } catch (error) {
+        document.getElementById('matchError').textContent = error.message;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      location.reload();
+    }
+
+    async function apiCall(url, method = 'GET', body = null) {
+      const options = {
+        method,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(url, options);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Request failed');
+      }
+
+      return data;
+    }
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+  </script>
+</body>
+</html>
