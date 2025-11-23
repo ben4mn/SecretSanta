@@ -61,6 +61,50 @@ router.post('/admin-login', authLimiter, async (req, res) => {
 });
 
 /**
+ * GET /api/auth/signup-info
+ * Get event details for signup page using token
+ */
+router.get('/signup-info', authLimiter, async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: 'Token required' });
+  }
+
+  const db = req.app.get('db');
+
+  try {
+    // Find user and event by token
+    const user = await dbGet(db, `
+      SELECT u.name, u.email, e.name as event_name, e.max_spend, e.bonus_item, e.theme, e.match_deadline, e.gift_deadline
+      FROM users u
+      JOIN events e ON u.event_id = e.id
+      WHERE u.signup_token = ?
+      AND u.token_expires > datetime('now')
+      AND u.is_registered = 0
+    `, [token]);
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+
+    res.json({
+      name: user.name,
+      email: user.email,
+      eventName: user.event_name,
+      maxSpend: user.max_spend,
+      bonusItem: user.bonus_item,
+      theme: user.theme,
+      matchDeadline: user.match_deadline,
+      giftDeadline: user.gift_deadline
+    });
+  } catch (error) {
+    console.error('Signup info error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * POST /api/auth/signup
  * User creates password with signup token
  */

@@ -50,25 +50,34 @@ npm start
 
 Server will be available at `http://localhost:3000`
 
-## Docker Deployment
+## 🚀 Deployment
 
-### Build and Run
+For detailed instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-```bash
-docker-compose up -d
-```
+### Quick Docker Deployment
 
-### View Logs
+1.  **Configure Environment**:
+    ```bash
+    cp .env.example .env
+    # Edit .env with your secrets and email config
+    nano .env
+    ```
 
-```bash
-docker-compose logs -f
-```
+2.  **Build and Run**:
+    ```bash
+    docker-compose up -d --build
+    ```
 
-### Stop
+3.  **Verify**:
+    ```bash
+    docker-compose logs -f
+    ```
 
-```bash
-docker-compose down
-```
+The application will be available at `http://localhost:3000` (or your configured port).
+
+### Requirements
+- Docker & Docker Compose
+- Gmail account with App Password (for emails)
 
 ## Production Deployment
 

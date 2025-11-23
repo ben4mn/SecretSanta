@@ -1,155 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Secret Santa 🎅</title>
   <link rel="stylesheet" href="/style.css">
-  <style>
-    .admin-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .events-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-
-    .event-card {
-      background: var(--snow);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(13, 92, 77, 0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .event-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .event-header {
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid rgba(13, 92, 77, 0.1);
-    }
-
-    .event-name {
-      font-size: 1.5em;
-      font-weight: 700;
-      color: var(--forest-green);
-      margin-bottom: 8px;
-    }
-
-    .event-meta {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .meta-badge {
-      padding: 6px 12px;
-      background: linear-gradient(135deg, rgba(13, 92, 77, 0.1) 0%, rgba(26, 77, 62, 0.15) 100%);
-      border-radius: 8px;
-      font-size: 0.85em;
-      font-weight: 600;
-      color: var(--deep-pine);
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(13, 92, 77, 0.1);
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 16px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--forest-green) 0%, var(--sage) 100%);
-      transition: width 0.3s ease;
-    }
-
-    .event-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .btn-small {
-      padding: 8px 16px;
-      font-size: 0.9em;
-      flex: 1;
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, var(--holly-red) 0%, #a01628 100%);
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--cream);
-      border-radius: 24px;
-      padding: 40px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--deep-pine);
-    }
-
-    .participant-list {
-      margin-top: 16px;
-    }
-
-    .participant-item {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .participant-item input {
-      flex: 1;
-    }
-
-    .btn-icon {
-      padding: 14px;
-      min-width: 48px;
-    }
-  </style>
 </head>
+
 <body>
   <div class="container admin-container">
     <div class="card">
@@ -161,12 +19,12 @@
         <button onclick="logout()" class="btn-secondary btn-small">Logout</button>
       </div>
 
-      <div style="text-align: center; margin-bottom: 32px;">
-        <button onclick="openCreateModal()" class="btn" style="font-size: 1.1em;">+ Create New Event</button>
+      <div class="create-event-btn-container">
+        <button onclick="openCreateModal()" class="btn btn-large">+ Create New Event</button>
       </div>
 
       <div id="eventsContainer" class="events-grid">
-        <p style="text-align: center; color: var(--sage);">Loading events...</p>
+        <p class="loading-text">Loading events...</p>
       </div>
     </div>
   </div>
@@ -209,231 +67,19 @@
         <div class="form-group">
           <label>Participants * (minimum 2)</label>
           <div id="participantsList" class="participant-list"></div>
-          <button type="button" onclick="addParticipant()" class="btn-secondary btn-small" style="margin-top: 12px;">+ Add Participant</button>
+          <button type="button" onclick="addParticipant()" class="btn-secondary btn-small add-participant-btn">+ Add
+            Participant</button>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <button type="button" onclick="closeModal()" class="btn-secondary" style="flex: 1;">Cancel</button>
-          <button type="submit" class="btn" style="flex: 1;">Save Event</button>
+        <div class="modal-actions">
+          <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn">Save Event</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script>
-    let accessToken = localStorage.getItem('accessToken');
-    let editingEventId = null;
-
-    if (!accessToken) {
-      window.location.href = '/';
-    }
-
-    loadEvents();
-
-    async function loadEvents() {
-      try {
-        const response = await apiCall('/api/admin/events');
-        displayEvents(response.events);
-      } catch (error) {
-        document.getElementById('eventsContainer').innerHTML = `<p style="text-align: center; color: var(--holly-red);">${error.message}</p>`;
-      }
-    }
-
-    function displayEvents(events) {
-      const container = document.getElementById('eventsContainer');
-
-      if (events.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--sage); grid-column: 1/-1;">No events yet. Create your first Secret Santa event!</p>';
-        return;
-      }
-
-      container.innerHTML = events.map(event => {
-        const progress = event.total_participants > 0
-          ? (event.registered_count / event.total_participants * 100).toFixed(0)
-          : 0;
-
-        const status = event.matches_generated ? '🎁 Matches Generated' :
-                      event.all_registered ? '✅ All Registered' :
-                      `⏳ ${event.registered_count}/${event.total_participants} Registered`;
-
-        return `
-          <div class="event-card">
-            <div class="event-header">
-              <div class="event-name">${event.name}</div>
-              <div class="event-meta">
-                <span class="meta-badge">$${event.max_spend} max</span>
-                <span class="meta-badge">${event.total_participants} people</span>
-              </div>
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-weight: 600; color: var(--deep-pine);">${status}</span>
-                <span style="color: var(--sage);">${progress}%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-              </div>
-            </div>
-
-            <div style="font-size: 0.9em; color: var(--sage); margin-top: 12px;">
-              <div>📅 Match Reveal: ${new Date(event.match_deadline).toLocaleDateString()}</div>
-              <div>🎁 Gift Exchange: ${new Date(event.gift_deadline).toLocaleDateString()}</div>
-            </div>
-
-            <div class="event-actions">
-              <button onclick="viewEvent(${event.id})" class="btn-secondary btn-small">View Details</button>
-              ${!event.matches_generated ? `
-                <button onclick="editEvent(${event.id})" class="btn-secondary btn-small">Edit</button>
-              ` : ''}
-              <button onclick="deleteEvent(${event.id}, '${event.name}')" class="btn-danger btn-small">Delete</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openCreateModal() {
-      editingEventId = null;
-      document.getElementById('modalTitle').textContent = 'Create New Event';
-      document.getElementById('eventForm').reset();
-      document.getElementById('participantsList').innerHTML = '';
-      addParticipant();
-      addParticipant();
-      document.getElementById('eventModal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('eventModal').classList.remove('active');
-    }
-
-    function addParticipant() {
-      const list = document.getElementById('participantsList');
-      const item = document.createElement('div');
-      item.className = 'participant-item';
-      item.innerHTML = `
-        <input type="text" placeholder="Name" required class="participant-name">
-        <input type="email" placeholder="Email" required class="participant-email">
-        <button type="button" onclick="this.parentElement.remove()" class="btn-danger btn-icon">✕</button>
-      `;
-      list.appendChild(item);
-    }
-
-    async function saveEvent(e) {
-      e.preventDefault();
-
-      const participants = Array.from(document.querySelectorAll('.participant-item')).map(item => ({
-        name: item.querySelector('.participant-name').value,
-        email: item.querySelector('.participant-email').value
-      }));
-
-      if (participants.length < 2) {
-        alert('At least 2 participants required');
-        return;
-      }
-
-      const data = {
-        name: document.getElementById('eventName').value,
-        maxSpend: parseFloat(document.getElementById('maxSpend').value),
-        bonusItem: document.getElementById('bonusItem').value || null,
-        theme: document.getElementById('theme').value || null,
-        matchDeadline: document.getElementById('matchDeadline').value,
-        giftDeadline: document.getElementById('giftDeadline').value,
-        participants,
-        sendEmails: false
-      };
-
-      try {
-        if (editingEventId) {
-          await apiCall(`/api/admin/events/${editingEventId}`, 'PUT', data);
-        } else {
-          await apiCall('/api/admin/events', 'POST', data);
-        }
-
-        closeModal();
-        loadEvents();
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    }
-
-    async function viewEvent(id) {
-      window.location.href = `/event.html?id=${id}`;
-    }
-
-    async function editEvent(id) {
-      try {
-        const response = await apiCall(`/api/admin/events/${id}`);
-        editingEventId = id;
-
-        document.getElementById('modalTitle').textContent = 'Edit Event';
-        document.getElementById('eventName').value = response.event.name;
-        document.getElementById('maxSpend').value = response.event.maxSpend;
-        document.getElementById('bonusItem').value = response.event.bonusItem || '';
-        document.getElementById('theme').value = response.event.theme || '';
-        document.getElementById('matchDeadline').value = response.event.matchDeadline;
-        document.getElementById('giftDeadline').value = response.event.giftDeadline;
-
-        document.getElementById('participantsList').innerHTML = '';
-        response.participants.forEach(p => {
-          const list = document.getElementById('participantsList');
-          const item = document.createElement('div');
-          item.className = 'participant-item';
-          item.innerHTML = `
-            <input type="text" placeholder="Name" required class="participant-name" value="${p.name}" readonly>
-            <input type="email" placeholder="Email" required class="participant-email" value="${p.email}" readonly>
-            <span style="padding: 14px; color: var(--sage);">${p.isRegistered ? '✓' : '○'}</span>
-          `;
-          list.appendChild(item);
-        });
-
-        document.getElementById('eventModal').classList.add('active');
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    }
-
-    async function deleteEvent(id, name) {
-      if (!confirm(`Are you sure you want to delete "${name}"? This will delete all participants and matches.`)) {
-        return;
-      }
-
-      try {
-        await apiCall(`/api/admin/events/${id}`, 'DELETE');
-        loadEvents();
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/';
-    }
-
-    async function apiCall(url, method = 'GET', body = null) {
-      const options = {
-        method,
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      };
-
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-
-      const response = await fetch(url, options);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
-      }
-
-      return data;
-    }
-  </script>
+  <script src="/js/admin.js"></script>
 </body>
+
 </html>

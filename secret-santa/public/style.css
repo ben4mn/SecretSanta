@@ -53,9 +53,12 @@ body::before {
 }
 
 @keyframes snowfall {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%;
   }
+
   50% {
     background-position: 100% 100%, 80% 80%, 60% 60%, 40% 40%, 20% 20%;
   }
@@ -96,6 +99,7 @@ body::before {
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -167,7 +171,8 @@ input::placeholder {
   color: rgba(13, 92, 77, 0.4);
 }
 
-button, .btn {
+button,
+.btn {
   padding: 14px 28px;
   background: linear-gradient(135deg, var(--holly-red) 0%, #a01628 100%);
   color: var(--snow);
@@ -186,7 +191,8 @@ button, .btn {
   overflow: hidden;
 }
 
-button::before, .btn::before {
+button::before,
+.btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -197,16 +203,19 @@ button::before, .btn::before {
   transition: left 0.5s;
 }
 
-button:hover::before, .btn:hover::before {
+button:hover::before,
+.btn:hover::before {
   left: 100%;
 }
 
-button:hover, .btn:hover {
+button:hover,
+.btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
 }
 
-button:active, .btn:active {
+button:active,
+.btn:active {
   transform: translateY(0);
 }
 
@@ -240,6 +249,27 @@ button:active, .btn:active {
 
 .welcome h2 {
   margin: 0;
+}
+
+/* Fix alignment for Admin Dashboard header */
+.welcome h1,
+.welcome .subtitle {
+  text-align: left;
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: var(--holly-red);
+  text-shadow: none;
+}
+
+.welcome h1 {
+  font-size: 2.5em;
+  margin-bottom: 4px;
+}
+
+.welcome .subtitle {
+  margin-bottom: 0;
+  font-size: 1em;
+  color: var(--sage);
 }
 
 .info-box {
@@ -329,7 +359,8 @@ table {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-th, td {
+th,
+td {
   padding: 14px 16px;
   text-align: left;
   border-bottom: 1px solid rgba(13, 92, 77, 0.08);
@@ -491,7 +522,8 @@ tr:hover td {
     font-size: 14px;
   }
 
-  th, td {
+  th,
+  td {
     padding: 10px 12px;
   }
 
@@ -501,12 +533,14 @@ tr:hover td {
 }
 
 /* Loading animation for buttons */
-button.loading, .btn.loading {
+button.loading,
+.btn.loading {
   pointer-events: none;
   opacity: 0.7;
 }
 
-button.loading::after, .btn.loading::after {
+button.loading::after,
+.btn.loading::after {
   content: '';
   position: absolute;
   width: 16px;
@@ -522,5 +556,241 @@ button.loading::after, .btn.loading::after {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* New styles for refactored components */
+.auth-buttons {
+  text-align: center;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.switch-link a {
+  color: var(--forest-green);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.switch-link a:hover {
+  color: var(--deep-pine);
+  text-decoration: underline;
+}
+
+/* Admin Styles */
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.event-card {
+  background: var(--snow);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(13, 92, 77, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.event-header {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(13, 92, 77, 0.1);
+}
+
+.event-name {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--forest-green);
+  margin-bottom: 8px;
+}
+
+.event-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.meta-badge {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(13, 92, 77, 0.1) 0%, rgba(26, 77, 62, 0.15) 100%);
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--deep-pine);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(13, 92, 77, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--forest-green) 0%, var(--sage) 100%);
+  transition: width 0.3s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.status-text {
+  font-weight: 600;
+  color: var(--deep-pine);
+}
+
+.progress-text {
+  color: var(--sage);
+}
+
+.event-dates {
+  font-size: 0.9em;
+  color: var(--sage);
+  margin-top: 12px;
+}
+
+.event-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.event-actions button {
+  flex: 1;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 0.9em;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--holly-red) 0%, #a01628 100%);
+}
+
+.btn-large {
+  font-size: 1.1em;
+  padding: 16px 32px;
+}
+
+.create-event-btn-container {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.loading-text {
+  text-align: center;
+  color: var(--sage);
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--sage);
+  grid-column: 1/-1;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--cream);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--deep-pine);
+}
+
+.participant-list {
+  margin-top: 16px;
+}
+
+.participant-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.participant-item input {
+  flex: 1;
+}
+
+.btn-icon {
+  padding: 14px;
+  min-width: 48px;
+}
+
+.add-participant-btn {
+  margin-top: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+.participant-status {
+  padding: 14px;
+  color: var(--sage);
 }

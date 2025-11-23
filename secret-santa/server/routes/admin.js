@@ -13,7 +13,7 @@ async function verifyAdmin(req, res, next) {
   const db = req.app.get('db');
 
   try {
-    const admin = await dbGet(db, 'SELECT * FROM admins WHERE id = ?', [req.user.id]);
+    const admin = await dbGet(db, 'SELECT * FROM admins WHERE id = ?', [req.user.userId || req.user.id]);
 
     if (!admin) {
       return res.status(403).json({ error: 'Admin access required' });

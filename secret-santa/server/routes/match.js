@@ -219,6 +219,12 @@ router.get('/status', verifyToken, async (req, res) => {
 
   try {
     const user = await dbGet(db, 'SELECT * FROM users WHERE id = ?', [req.user.userId || req.user.id]);
+
+    if (!user) {
+      // If user not found (e.g. admin accessing this endpoint), return empty status or error
+      return res.status(404).json({ error: 'User not found or not a participant' });
+    }
+
     const event = await dbGet(db, 'SELECT * FROM events WHERE id = ?', [user.event_id]);
 
     const allUsers = await dbAll(db, 'SELECT * FROM users WHERE event_id = ?', [user.event_id]);
